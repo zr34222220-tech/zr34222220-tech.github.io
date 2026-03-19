@@ -102,28 +102,30 @@ copyRight = "Copyright (c) 2020-2026 Thulite"
   quality = 85
   resampleFilter = "Lanczos"
 
-[[module.mounts]]
-  source = "assets"
-  target = "assets"
+# 必须先声明 [module] 块
+[module]
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
 
-[[module.mounts]]
-  source = "static"
-  target = "static"
+  [[module.mounts]]
+    source = "static"
+    target = "static"
 
-[[module.mounts]]
-  source = "layouts"
-  target = "layouts"
+  [[module.mounts]]
+    source = "layouts"
+    target = "layouts"
 
-# 确保能找到 Doks 的所有局部模板
-[[module.mounts]]
-  source = "node_modules/@thulite/doks-core/layouts"
-  target = "layouts"
+  # 映射 Doks 主题的核心布局
+  [[module.mounts]]
+    source = "node_modules/@thulite/doks-core/assets"
+    target = "assets"
 
-[[module.mounts]]
-  source = "node_modules/@thulite/doks-core/assets"
-  target = "assets"
+  [[module.mounts]]
+    source = "node_modules/@thulite/doks-core/layouts"
+    target = "layouts"
 
-# 补充核心库的布局路径
-[[module.mounts]]
-  source = "node_modules/@thulite/core/layouts"
-  target = "layouts"
+  # 映射核心库的布局
+  [[module.mounts]]
+    source = "node_modules/@thulite/core/layouts"
+    target = "layouts"
