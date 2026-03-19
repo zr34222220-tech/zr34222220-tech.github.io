@@ -533,6 +533,18 @@ local		juming-nginx
 #如何确定是具名挂载还是匿名挂载，还是指定路径挂载！
 -V 容器内路径	 	  #匿名挂载
 -V 卷名：容器内路径		#具名挂载
--v /宿主机路径：容器内路径	#指定路径挂载！
+-v /宿主机路径:/容器内路径	#指定路径挂载！
+```
+
+```shell
+#通过 -v 容器内路径：ro rw改变读写权限
+ro readOnly
+rw readWrite
+
+#一旦设置了容器权限，容器对我们挂载出的内容就有限定了！
+docker run -d -P --name nginx02 -v juming-nginx:/etc/nginx:ro nginx
+docker run -d -P --name nginx02 -v juming-nginx:/etc/nginx:rw nginx
+
+# ro 只能通过宿主机进行操作，容器内无法操作！
 ```
 
