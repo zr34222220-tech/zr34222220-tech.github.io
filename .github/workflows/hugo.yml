@@ -15,7 +15,7 @@ permissions:
   pages: write
   id-token: write
 
-# 限制同一时间只有一个部署任务在运行
+# 限制同一时间只有一个部署任务在 运行
 concurrency:
   group: "pages"
   cancel-in-progress: false
