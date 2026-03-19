@@ -1,5 +1,5 @@
 title = "My Docs"
-baseurl = "http://localhost/"
+baseurl = "https://zr34222220-tech.github.io/"
 disableAliases = true
 disableHugoGeneratorInject = true
 # disableKinds = ["taxonomy", "term"]
