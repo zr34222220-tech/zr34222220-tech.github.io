@@ -114,14 +114,16 @@ copyRight = "Copyright (c) 2020-2026 Thulite"
   source = "layouts"
   target = "layouts"
 
-[[module.mounts]]
-  source = "node_modules/@thulite/doks-core/assets"
-  target = "assets"
-
+# 确保能找到 Doks 的所有局部模板
 [[module.mounts]]
   source = "node_modules/@thulite/doks-core/layouts"
   target = "layouts"
 
+[[module.mounts]]
+  source = "node_modules/@thulite/doks-core/assets"
+  target = "assets"
+
+# 补充核心库的布局路径
 [[module.mounts]]
   source = "node_modules/@thulite/core/layouts"
   target = "layouts"
