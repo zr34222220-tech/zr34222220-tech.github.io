@@ -884,7 +884,69 @@ LABEL org.opencontainers.image.authors="runoob"
 
 ### 实战：Tomcat镜像
 
+```shell
+在这个实战中，我们将准备 Tomcat 和 JDK 的压缩包，并使用 `Dockerfile` 构建一个包含 Java 环境的自定义 Tomcat 镜像，最后挂载运行并发布一个简单的网站项目。
 
+# 1. 准备工作
+创建一个目录，将下载好的 JDK 和 Tomcat 压缩包（以 `jdk-8u11-linux-x64.tar.gz` 和 `apache-tomcat-9.0.22.tar.gz` 为例）放入该目录。同目录下还可以建一个 `readme.txt` 用于测试复制。
+
+# 2. 编写 Dockerfile
+在同级目录下创建一个名为 `Dockerfile`（或 `Dockerfile-tomcat`）的文件，编写以下构建脚本：
+
+FROM centos:7
+
+# 把宿主机当前目录的 readme.txt 拷贝到容器 /usr/local/ 路径下
+COPY readme.txt /usr/local/readme.txt
+
+# 把 JDK 和 Tomcat 添加到容器中，ADD 命令会自动解压！
+ADD jdk-8u11-linux-x64.tar.gz /usr/local/
+ADD apache-tomcat-9.0.22.tar.gz /usr/local/
+
+# 安装 vim 编辑器
+RUN yum -y install vim
+
+# 设置工作环境变量 MYPATH，并跳转到该工作目录
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+
+# 配置 Java 与 Tomcat 环境变量 (注意版本号需和压缩包解压后的文件夹名一致)
+ENV JAVA_HOME /usr/local/jdk1.8.0_11
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV CATALINA_HOME /usr/local/apache-tomcat-9.0.22
+ENV CATALINA_BASH /usr/local/apache-tomcat-9.0.22
+ENV PATH $PATH:$JAVA_HOME/bin:$CATALINA_HOME/lib:$CATALINA_HOME/bin
+
+# 暴露 8080 端口
+EXPOSE 8080
+
+# 设置容器启动时运行的命令：启动 Tomcat 并持续打印日志，防止容器停止
+CMD /usr/local/apache-tomcat-9.0.22/bin/startup.sh && tail -F /usr/local/apache-tomcat-9.0.22/logs/catalina.out
+```
+
+
+
+#### 3. 构建镜像
+
+在 `Dockerfile` 所在目录下执行构建命令（注意最后的 `.` 代表当前上下文）：
+```shell
+# -t 命名镜像为 diytomcat
+docker build -t diytomcat .
+```
+
+#### 4. 运行并挂载容器
+镜像构建成功后，运行容器。为了方便日后发布项目和查看日志，我们需要利用数据卷（Volume）将容器内的 `webapps` 和 `logs` 目录挂载到宿主机上：
+```shell
+docker run -d -p 9090:8080 --name mytomcat \
+-v /home/zr/build/tomcat/test:/usr/local/apache-tomcat-9.0.22/webapps/test \
+-v /home/zr/build/tomcat/tomcatlogs:/usr/local/apache-tomcat-9.0.22/logs \
+diytomcat
+```
+
+#### 5. 测试与发布项目
+1. **测试访问**：
+   此时访问 `http://公网IP:9090`，即可看到 Tomcat 的经典报错页面或主页。
+2. **发布项目**：
+   因为我们配置了挂载，现在**不需要进入容器内部**，直接在宿主机的 `/home/zr/build/tomcat/test` 目录下新建 `WEB-INF/web.xml` 和 `index.jsp` 文件。写好前端代码后，刷新网页，挂载的数据会实时同步，网页项目就成功发布了！
 
 
 
@@ -934,6 +996,8 @@ docker run -d --name mysql-container -p 3306:3306 -v /mysqlData:/var/lib/mysql  
 ```
 
 ---
+
+
 
 ####  **--docker network**
 
@@ -987,3 +1051,74 @@ docker network connect my-net tomcat01
 ---
 
 ### 实战：部署Redis集群
+
+```shell
+#实战：部署Redis集群
+
+在这个实战中，我们将使用 Docker 搭建一个 3 主 3 从的 Redis 集群（共 6 个节点）。
+
+#1. 创建自定义网络
+首先，我们需要为 Redis 集群创建一个专属网络，并指定网段，这样我们就能为每个 Redis 容器分配固定的静态 IP。
+
+docker network create redis --subnet 172.38.0.0/16
+```
+
+#### 2. 批量生成 Redis 配置文件
+借助 Shell 的 `for` 循环，一键生成 6 个 Redis 节点的配置文件（挂载到宿主机的 `/mydata/redis/` 目录下）：
+```shell
+for port in $(seq 1 6); \
+do \
+mkdir -p /mydata/redis/node-${port}/conf
+touch /mydata/redis/node-${port}/conf/redis.conf
+cat << EOF >/mydata/redis/node-${port}/conf/redis.conf
+port 6379 
+bind 0.0.0.0
+cluster-enabled yes 
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+cluster-announce-ip 172.38.0.1${port}
+cluster-announce-port 6379
+cluster-announce-bus-port 16379
+appendonly yes
+EOF
+done
+```
+
+#### 3. 批量启动 6 个 Redis 容器
+继续使用 `for` 循环，批量拉起 6 个 Redis 容器：
+```shell
+for port in $(seq 1 6); \
+do \
+docker run -p 637${port}:6379 -p 1637${port}:16379 --name redis-${port} \
+-v /mydata/redis/node-${port}/data:/data \
+-v /mydata/redis/node-${port}/conf/redis.conf:/etc/redis/redis.conf \
+-d --net redis --ip 172.38.0.1${port} redis:5.0.9-alpine3.11 redis-server /etc/redis/redis.conf; \
+done
+```
+
+#### 4. 创建并激活集群
+容器都启动后，它们还只是独立的节点。我们需要进入其中一个容器，将它们组合成真正的集群。
+```shell
+# 1. 进入第一个容器
+docker exec -it redis-1 /bin/sh
+
+# 2. 执行创建集群命令（--cluster-replicas 1 表示每个主节点有一个从节点，所以前三个是主，后三个是从）
+redis-cli --cluster create 172.38.0.11:6379 172.38.0.12:6379 172.38.0.13:6379 172.38.0.14:6379 172.38.0.15:6379 172.38.0.16:6379 --cluster-replicas 1
+```
+*执行期间输入 `yes` 确认分配槽位即可。*
+
+#### 5. 测试集群高可用
+集群创建完成后，可以进行基础测试：
+```shell
+# 以集群模式(-c)连接 Redis
+redis-cli -c
+
+# 查看集群信息和节点状态
+cluster info
+cluster nodes
+
+# 测试写入数据（观察槽位重定向 Redirected）
+set name zr
+get name
+```
+如果是集群模式，存入数据时，如果分配的哈希槽不在当前节点，Redis 会自动将你重定向（Redirected）到正确的节点去处理！
