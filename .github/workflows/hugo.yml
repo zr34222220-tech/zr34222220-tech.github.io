@@ -1,15 +1,15 @@
-# 自动部署 Hugo 网站�?GitHub Pages 的脚�?
+# 自动部署 Hugo 网站到 GitHub Pages 的脚本
 name: Deploy Hugo site to Pages
 
 on:
-  # 当你�?main 分支推送代码时触发
+  # 当你向 main 分支推送代码时触发
   push:
     branches: ["main"]
 
   # 允许你在 GitHub 界面手动触发
   workflow_dispatch:
 
-# 设置 GITHUB_TOKEN 的权限，允许部署�?GitHub Pages
+# 设置 GITHUB_TOKEN 的权限，允许部署到 GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -29,7 +29,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      HUGO_VERSION: 0.155.0 # 你可以根据需要更�?Hugo 版本
+      HUGO_VERSION: 0.155.0 # 你可以根据需要更改 Hugo 版本
     steps:
       - name: Checkout
         uses: actions/checkout@v4
