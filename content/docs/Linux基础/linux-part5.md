@@ -190,8 +190,9 @@ lvcreate -L 200M -n lv1 vg1
 
 #### （4）格式化逻辑卷
 
-```
-mkfs.ext4 /dev/vg1/lv1
+```shell
+mkfs.ext4 /dev/vg1/lv1	#ext4系统
+mkfs.xfs /dev/vg1/lv1	#xfs系统
 ```
 
 ------
@@ -222,9 +223,16 @@ vgextend vg1 /dev/sdc
 
 扩展文件系统：
 
+```shell
+resize2fs /dev/vg1/lv1	#ext4系统
+xfs_growfs /dev/vg1/lv1	#xfs系统
 ```
-resize2fs /dev/vg1/lv1
-```
+
+**vgextend = 给卷组加空间**
+
+**lvextend = 给逻辑卷分空间**
+
+顺序：先 vgextend，再 lvextend，最后刷新文件系统
 
 ------
 
