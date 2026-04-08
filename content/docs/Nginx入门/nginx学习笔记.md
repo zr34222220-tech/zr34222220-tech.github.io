@@ -376,12 +376,42 @@ server {
 ### gzip配置 [​](#gzip配置)
 
 ```shell
-http{
-	  gzip on; # 开启压缩，压缩后发送给客户端
-		gzip_min_length 1;# 设置最小压缩下限。1就是小于1字节的文件不压缩
-		gzip_comp_level 6 # 压缩级别0-9，值越大文件就压缩的越小，相应的会损耗更多性能
-		gzip_type text/plain application/javascript image/* # 指定哪些 MIME 类型，开启压缩（不写默认全部），可以使用通配符 image/* 就是所有图片。具体哪些类型可以看conf/mime.types文件
-}
+# 开启 gzip 压缩
+gzip on;
+
+# 启用 gzip 压缩的最小文件限制。
+# 建议设为 1k，因为太小的文件压缩后反而可能变大
+gzip_min_length 1k;
+
+# 压缩级别 (1-9)
+# 推荐 5 或 6。级别越高压缩率越大，但极其消耗 CPU。
+# 6 是性能和压缩比的最佳平衡点。
+gzip_comp_level 6;
+
+# 设置压缩所需要的缓冲区大小
+gzip_buffers 16 8k;
+
+# 用于识别 HTTP 协议版本，默认就是 1.1
+gzip_http_version 1.1;
+
+# 哪些类型的文件需要压缩
+# 核心原则：压缩文本类（HTML/CSS/JS/XML），【不要】压缩图片/音视频
+gzip_types 
+    text/plain 
+    text/css 
+    text/javascript 
+    application/javascript 
+    application/json 
+    application/xml 
+    application/rss+xml 
+    image/svg+xml;
+
+# 增加一个响应头 "Vary: Accept-Encoding"
+# 告诉代理服务器（如 CDN）区分压缩和非压缩版本，这是性能优化的好习惯
+gzip_vary on;
+
+# 禁用旧版 IE6 的压缩，因为它们兼容性很差
+gzip_disable "MSIE [1-6]\.";
 ```
 
 

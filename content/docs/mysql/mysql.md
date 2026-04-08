@@ -7,19 +7,7 @@ draft: false
 
 ---
 
-# MySQL 命令
-
-## 目录
-1. 安装 MySQL
-2. 连接与进入数据库
-3. 建表与基础数据操作（CRUD）
-4. 表结构修改（DDL）
-5. 条件查询与排序
-6. 聚合与分组统计
-7. 子查询与结果复用
-8. 连接查询（JOIN）
-9. 索引
-10. 视图
+# MySQL 
 
 ## 1. 安装 MySQL
 ```bash
@@ -207,3 +195,108 @@ CREATE OR REPLACE VIEW top10 AS
 SELECT * FROM player ORDER BY level DESC LIMIT 10;
 SELECT * FROM top10;
 ```
+
+---
+
+## 12.权限管理
+
+**一.创建用户**
+语法：
+
+CREATE USER ‘用户名’ @ ‘主机地址’ IDENTIFIED BY ‘密码’；
+
+**创建本地登录用户**
+
+CREATE USER  ‘dev’ @ ‘localhost’ IDENTIFIED BY ‘P@ssw0rd!’；
+
+**创建远程登录用户（允许任意IP访问)**
+注意事项：
+
+* 主机地址可以是1oca1host（仅本地）、%（任意IP）或具体IP（如192.168.1.100）。
+* 密码需符合安全策略（8位以上，含大小写字母、数字、符号。 
+
+```sql
+#创建账号
+CREATE USER 'dev'@'192.168.241.%'      IDENTIFIED BY 'P@SSW0rd!' ;
+
+CREATE USER 'dev'@'127.0.0.1' IDENTIFIED BY 'P@SSW0rd!‘ ;
+
+flush privileges ;		#刷新
+```
+
+**二. 授予用户权限**
+
+* 语法格式：
+  GRANT 权限列表 ON 数据库 .表 TO ‘用户名' @ '主机地址'；
+
+* 全局权限
+
+  ```sql
+  GRANT ALL PRIVILEGES ON \*.* TO 'admin' @ '%' ;                
+  #所有数据库和表的所有权限
+  ```
+
+* **数据库级权限 (一般做到这个级别)**
+
+  ```sql
+  GRANT SELECT, INSERT ON mydb.*  To 'dev' @ 'localhost';
+  
+  GRANT SELECT,INSERT,UPDATE,DELETE ON 库名.* TO '用户'@'IP';
+  ```
+
+* 表级权限
+
+  ```sql
+  GRANT UPDATE, DELETE ON mydb.orders To 'user1'@'192.168.1.100';
+  ```
+
+* 列级权限
+
+  ```sql
+  GRANT SELECT
+  (id,name) , UPDATE (price)ON mydb.products  To 'audit '@'%' ; 
+  ```
+
+* 常用权限列表：
+  SELECT(查询)、INSERT(插入)、UPDATE(更新)、DELETE(删除)、CREATE(创建表)、ALTER(修改表)、DROP(删除表)、INDEX(管理索引)
+
+---
+
+**撤回权限**
+
+```sql
+REVOKE ALL PRIVILEGES ON linux.* FROM 'dev'@'192.168.241.%';
+REVOKE ALL PRIVILEGES ON linux.* FROM 'dev'@'127.0.0.1';
+flush privileges ;		#刷新
+```
+
+---
+
+**删除账号**
+
+```sql
+DROP USER 'dev'@'192.168.241.%' ;
+
+DROP USER 'dev'@'127.0.0.1' ；
+```
+
+---
+
+### 权限总结
+
+1. **最小权限原则**：给够用的，不给多余的
+2. **授权级别：库级别 > 表级别 > 全局级别**
+3. **普通账号只给单库的 增删改查**
+4. **root 不外放，不远程，不写进项目配置**
+
+---
+
+
+
+## 13.数据备份与恢复
+
+**逻辑备份工具-mysqldump**
+
+* 使用mysqldump可以导出数据库结构
+  和数据，生成SQL语句，便于数据迁
+  移和备份。
