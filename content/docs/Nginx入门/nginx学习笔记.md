@@ -672,45 +672,20 @@ firewall-cmd --list-all #所有开启的规则
 
 浏览器中网页地址与请求地址不同域，会出现跨域问题
 
-Nginx作为网关，外部所有请求都通过Nginx服务器转发到内部
+此处用来解决跨域问题，需要添加两个头信息，分别是`Access-Control-A1low-Origin`、`Access-Control-Allow-Methods`
 
-通常后端接口，可以在响应头中增加 `Access-Control-Allow-Origin`字段，并将值设置为前端域名，解决跨域问题。但是静态资源出现跨域就必须在Nginx中配置了
+1. `Access-Control-Allow-Origin`:直译过来是允许跨域访问的源地址信息，可以配置多个(多个用逗号分隔)，也可以使用*代表所有源
+
+2. `Access-Control-A1low-Methods`:直译过来是允许跨域访问的请求方式，值可以为GET、POST、PUT、DELETE…,可以全部设置，也可以根据需要设置，多个用逗号分隔
 
 ```shell
-server {
-        listen       80;
-        server_name  localhost;
-				
-				# 为当前的server配置跨域配置
-				
-				# 允许跨域的请求，*表示所有
-        add_header 'Access-Control-Allow-Origin' *;
-        
-        # 允许携带cookie请求
-        add_header 'Access-Control-Allow-Credentials' 'true';
-        
-        # 允许跨域请求的方法：GET,POST,OPTIONS,PUT
-        add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT';
-        
-        # 允许请求时携带的头部信息，*表示所有
-        add_header 'Access-Control-Allow-Headers' *;
-        
-        # 允许发送按段获取资源的请求
-        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
-        location /fpath {
-              root   /home;
-              index  index.html;
-              # post请求如果出现跨域，必须放在这具体请求的路径里面才行
-              # 在发送Post跨域请求前，会以Options方式发送预检请求，服务器接受时才会正式请求
-              
-                 add_header Access-Control-Allow-Origin *;
-				 add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE,OPTIONS;
-				 add_header Access-Control-Allow-Headers Content-Type,Authorization;
-                 # 对于Options方式的请求返回204，表示接受跨域请求
-                if ($request_method = 'OPTIONS') { # nginx配置中=表示比较，不是赋值
-                return 204;
-              }
-        }
+location /getUser {
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE,OPTIONS;
+    add_header Access-Control-Allow-Headers *;
+    add_header Access-Control-Allow-Credentials true; # 可选
+    default_type application/json;
+    return 200 '{"id":1, "name":"TOM", "age":18}';
 }
 ```
 
@@ -1753,7 +1728,7 @@ server {
 rewrite是URL重写的关键指令，根据regex（正则表达式）部分内容，重定向到replacement，结尼是flag标记。
 
 rewrite    <regex>   <replacement>  [flag];
-关键字				正则				替代内容     flagt标记
+关键字		  正则		替代内容     flagt标记
 
 正则：per1森容正则表达式语句进行规则匹配
 替代内容：将正则匹配的内容替换成replacement
@@ -1773,10 +1748,10 @@ permanent #返回301永久重定向，测览器地址栏会显示跳转后的URL
 ```shell
 server {
         listen       80;
-        server_name  www.hedaodao.com;
+        server_name  www.ruizr.site;
 				
 				location / { 
-						rewrite ^/(.*) https://www.hedaodao.com/$1 redirect;
+						rewrite ^/(.*) https://www.ruizr.site/$1 redirect;
 						# 匹配到uri的/后的内容，并放到$1中，执行重定向
         		proxy_pass http://xxx;
         }
@@ -1793,37 +1768,29 @@ server {
 ![image-20220503162830153](https://hedaodao-1256075778.cos.ap-beijing.myqcloud.com/Nginx/image-20220503162830153.png)
 
 ```shell
-valid_referers none|server_name
+valid_referers none blocked server_names *.example.com;			#设置白名单
 ```
 
 设置有效的refer值
 
-*   none：不校验refer
-*   server\_name：校验refer地址是否为server\_name（server\_name可以使用通配符）
+*   `none`：不校验refer
+*   `blocked` = 允许隐藏 Referer
+*   `server_name`：校验refer地址是否为server\_name（server\_name可以使用通配符）
 
 注意： `if ($invalid_referer)`中if后有个空格，不写就会报错
 
-```shell
-nginx: [emerg] unknown directive "if($invalid_referer)" in /usr/local/nginx/conf/nginx.conf:27
-```
-
-例子：这里设置nginx服务器中的img目录下的图片必须refer为http:192.168.174/133才能访问
 
 
+例子：这里设置nginx服务器中的img目录下的图片必须refer为http:192.168.9.10才能访问
 
 ```shell
-server {
-        listen       80;
-        server_name  localhost;
-        location /img{
-                    valid_referers *.xxx.com;
-                    if ($invalid_referer){#无效的
-                            return 403;#返回状态码403
-                    }
-                    root html;
-                    index  index.html index.htm;
+location ~* \.(png|jpg)$ {
+            valid_referers none blocked www.baidu.com 192.168.9.10;
+            if ($invalid_referer){#无效的
+                return 403;#返回状态码403
             }
-}
+            root /usr/local/nginx/html;
+        }
 ```
 
 

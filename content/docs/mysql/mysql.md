@@ -9,7 +9,10 @@ draft: false
 
 # MySQL 
 
-## 1. 安装 MySQL
+详细请看https://geek-blogs.com/blog/how-to-setup-mysql-on-linux/
+
+## 1.安装 MySQL
+
 ```bash
 # Windows（Chocolatey）
 choco install -y mysql
@@ -21,11 +24,113 @@ yum install mysql-server
 docker pull mysql
 ```
 
-## 2. 连接与进入数据库
+## 2. 安全加固
+
+#### 2.1 **运行 `mysql_secure_installation` 脚本**
+
+```
+sudo mysql_secure_installation
+```
+
+流程说明：
+
+1. **验证密码强度插件**：输入 `y` 启用 `validate_password` 插件（推荐），可设置密码强度策略（长度、复杂度）。
+2. **设置 root 密码**：若安装时未设置，此处需输入新密码（MySQL 8.0 可能需先通过 `sudo mysql` 登录后修改，见下文补充）。
+3. **移除匿名用户**：输入 `y`（匿名用户允许任何人无需密码登录，存在安全隐患）。
+4. **禁止 root 远程登录**：输入 `y`（默认仅允许本地登录，如需远程管理需后续手动配置）。
+5. **删除 test 数据库**：输入 `y`（默认存在的空数据库，无用且可能被滥用）。
+6. **刷新权限表**：输入 `y`（使配置立即生效）。
+
+#### 2.2 常用核心参数优化
+
 ```sql
+[mysqld]
+# 网络配置
+bind-address = 127.0.0.1     # 纯本地访问（需要允许任何 IP 远程访问，请改回 0.0.0.0）
+port = 3306
+
+# 编码配置
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# 性能优化
+max_connections = 1000
+innodb_buffer_pool_size = 2G  # 确保你的服务器总内存大于 4G，否则请调小（如 512M）
+skip_name_resolve = ON
+
+# 日志配置
+slow_query_log = ON
+slow_query_log_file = /var/log/mysql/slow.log
+long_query_time = 2
+log_error = /var/log/mysql/error.log
+```
+
+```sql
+sudo systemctl restart mysqld	#重启mysql
+```
+
+####  2.3 常用运维查询
+
+```sqlite
+-- 建库建表（运维记录用）
+CREATE DATABASE ops_db DEFAULT CHARSET utf8mb4;
+USE ops_db;
+CREATE TABLE t_deploy (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    env VARCHAR(20) COMMENT '环境：dev/test/staging/prod',
+    version VARCHAR(50) COMMENT '版本号',
+    operator VARCHAR(50) COMMENT '操作人',
+    status VARCHAR(20) COMMENT 'success/failed/rollback',
+    deploy_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE t_server (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    hostname VARCHAR(100),
+    ip VARCHAR(20),
+    role VARCHAR(50) COMMENT '角色：web/db/monitor',
+    status VARCHAR(20) DEFAULT 'online'
+);
+
+-- 用户权限管理（最小权限原则）
+CREATE USER 'appuser'@'192.168.10.%' IDENTIFIED BY 'App@123';
+GRANT SELECT, INSERT, UPDATE, DELETE ON ops_db.* TO 'appuser'@'192.168.10.%';
+CREATE USER 'readonly'@'%' IDENTIFIED BY 'Read@123';
+GRANT SELECT ON ops_db.* TO 'readonly'@'%';
+FLUSH PRIVILEGES;
+SHOW GRANTS FOR 'appuser'@'192.168.10.%';
+
+-- 常用运维查询（每条都要亲手跑一遍，理解输出含义）
+SHOW PROCESSLIST;                          -- 查看当前所有连接
+SHOW STATUS LIKE 'Threads_connected';      -- 当前连接数
+SHOW VARIABLES LIKE 'max_connections';     -- 最大连接数配置
+SHOW VARIABLES LIKE 'slow_query%';         -- 慢查询配置
+SHOW STATUS LIKE 'Slow_queries';           -- 慢查询累计次数
+
+-- 查看各库占用空间
+SELECT table_schema AS '数据库',
+       ROUND(SUM(data_length+index_length)/1024/1024, 2) AS '大小(MB)'
+FROM information_schema.tables
+GROUP BY table_schema ORDER BY 2 DESC;
+
+-- 查看表行数和大小
+SELECT table_name, table_rows,
+       ROUND(data_length/1024/1024,2) AS 'data_MB',
+       ROUND(index_length/1024/1024,2) AS 'index_MB'
+FROM information_schema.tables
+WHERE table_schema='ops_db';
+```
+
+
+
+## 3.连接与进入数据库
+
+```sql
+mysql -u root -p
 USE game;
 ```
 作用：切换到 `game` 数据库，后续建表和查询都在这个库里执行。
+
+
 
 ## 3. 建表与基础数据操作（CRUD）
 ```sql

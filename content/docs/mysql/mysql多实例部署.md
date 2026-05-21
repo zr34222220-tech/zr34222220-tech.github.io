@@ -1,3 +1,12 @@
+---
+title: "mysql"
+weight: 20
+date: 2025-12-15
+draft: false
+
+
+---
+
 # MySQL 多实例部署：独立 systemd 服务
 
 > 适用系统：OpenCloudOS 8 / 9（及 RHEL/CentOS 8+ 系列）
