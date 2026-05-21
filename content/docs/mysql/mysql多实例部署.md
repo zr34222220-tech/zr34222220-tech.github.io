@@ -1,6 +1,6 @@
 ---
-title: "mysql"
-weight: 20
+title: "mysql多实例部署"
+weight: 30
 date: 2025-12-15
 draft: false
 
