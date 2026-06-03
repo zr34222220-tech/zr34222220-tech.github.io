@@ -1,0 +1,199 @@
+{
+  "main": {
+    "id": "8a4e2c7522207e25",
+    "type": "split",
+    "children": [
+      {
+        "id": "9ec7aed53a030ab0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "303a8a36c77c047c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30天运维实战计划（杭州岗位版） (1).md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "30天运维实战计划（杭州岗位版） (1)"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "88d24f0e10eac685",
+    "type": "split",
+    "children": [
+      {
+        "id": "0853d86fc7c20205",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c61ee83ca9124eef",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "4abd55ebe7b9baeb",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "ad90c2188493b580",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "d9774469b1c09eb0",
+    "type": "split",
+    "children": [
+      {
+        "id": "8258b8426b171637",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6964e3e213f6f038",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "ensp实战/ensp.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "ensp 的反向链接列表"
+            }
+          },
+          {
+            "id": "0c2679c9b11cd402",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "ensp实战/ensp.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "ensp 的出链列表"
+            }
+          },
+          {
+            "id": "db099f4ba88cf374",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "41955f381f4086f0",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "baf0f65ab04d863a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "ensp实战/ensp.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "ensp 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "303a8a36c77c047c",
+  "lastOpenFiles": [
+    "问题.md",
+    "30天运维实战计划（杭州岗位版） (1).md",
+    "resources.md",
+    "ensp实战/ensp.md",
+    "Markdown语法/Markdown语法.md",
+    "Linux基础/linux-part5.md",
+    "docker/docker.md",
+    "docker/1773907034350.png",
+    "docker/_index.md"
+  ]
+}

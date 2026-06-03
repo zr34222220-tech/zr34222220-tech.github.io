@@ -9,20 +9,65 @@ draft: false
 
 # MySQL 
 
-详细请看https://geek-blogs.com/blog/how-to-setup-mysql-on-linux/
+详细请看 https://geek-blogs.com/blog/how-to-setup-mysql-on-linux/
 
-## 1.安装 MySQL
+### 第一步：彻底清除之前残留的旧源和缓存
+
+为了不让 EL8/EL9 的老配置文件和缓存继续作祟，先执行以下命令：
+
+```bash
+# 1. 移除旧的 mysql-release 配置包
+sudo dnf remove mysql-release mysql80-community-release -y
+
+# 2. 清理干净所有残留的 repo 文件
+sudo rm -f /etc/yum.repos.d/mysql-community*.repo
+
+# 3. 彻底清空 DNF 缓存
+sudo dnf clean all && sudo dnf makecache
+```
+
+
+
+### 第二步：安装 MySQL
 
 ```bash
 # Windows（Chocolatey）
 choco install -y mysql
 
 # Linux（CentOS/RHEL）
-yum install mysql-server
+yum install mysql-server8.4 -y
 
 # Docker 拉取镜像
 docker pull mysql
 ```
+
+
+
+### 第三步：启动并设置开机自启
+
+---
+
+```
+sudo systemctl start mysqld
+sudo systemctl enable mysqld
+```
+
+**查看首次启动的随机临时密码**
+
+```
+sudo grep 'temporary password' /var/log/mysqld.log
+
+#8.4版本默认没有密码
+```
+
+```sql
+sudo mysql -u root  # 无需密码直接登录（Ubuntu/Debian 常见）
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '你的强密码';
+mysql> FLUSH PRIVILEGES;  # 刷新权限
+exit  # 退出后重新执行 mysql_secure_installation
+```
+
+
 
 ## 2. 安全加固
 
@@ -42,6 +87,15 @@ sudo mysql_secure_installation
 6. **刷新权限表**：输入 `y`（使配置立即生效）。
 
 #### 2.2 常用核心参数优化
+
+不同 Linux 发行版的配置文件路径可能不同：
+
+- **Ubuntu/Debian**：主配置文件 `/etc/mysql/my.cnf`，包含 `!includedir /etc/mysql/conf.d/` 和 `!includedir /etc/mysql/mysql.conf.d/`（推荐在 `conf.d/` 下创建自定义配置文件，如 `my-custom.cnf`）。
+- **CentOS/RHEL**：主配置文件 `/etc/my.cnf`，包含 `!includedir /etc/my.cnf.d/`。
+
+建议通过 `mysql --help | grep my.cnf` 查看当前加载的配置文件顺序。
+
+
 
 ```sql
 [mysqld]
@@ -68,6 +122,8 @@ log_error = /var/log/mysql/error.log
 ```sql
 sudo systemctl restart mysqld	#重启mysql
 ```
+
+
 
 ####  2.3 常用运维查询
 
@@ -132,7 +188,7 @@ USE game;
 
 
 
-## 3. 建表与基础数据操作（CRUD）
+## 4. 建表与基础数据操作（CRUD）
 ```sql
 CREATE TABLE player (
   id INT,
@@ -155,7 +211,7 @@ UPDATE player SET exp=0,gold=0;
 DELETE FROM player WHERE gold=0;
 ```
 
-## 4. 表结构修改（DDL）
+## 5. 表结构修改（DDL）
 ```sql
 DESC player;
 
@@ -169,7 +225,7 @@ ALTER TABLE player DROP COLUMN last_login;
 DROP TABLE player;
 ```
 
-## 5. 条件查询与排序
+## 6. 条件查询与排序
 ```sql
 SELECT * FROM player WHERE level > 1;
 SELECT * FROM player WHERE level > 1 AND level < 5;
@@ -188,7 +244,7 @@ SELECT * FROM player ORDER BY level DESC;
 SELECT * FROM player ORDER BY level DESC, exp;
 ```
 
-## 6. 聚合与分组统计
+## 7. 聚合与分组统计
 ```sql
 SELECT COUNT(*) FROM player;
 SELECT AVG(exp) FROM player;
@@ -209,7 +265,7 @@ LIMIT 2,3;
 SELECT DISTINCT sex FROM player;
 ```
 
-## 7. 子查询与结果复用
+## 8. 子查询与结果复用
 ```sql
 SELECT * FROM player WHERE level > (SELECT AVG(level) FROM player);
 
@@ -227,7 +283,7 @@ SELECT * FROM player WHERE level BETWEEN 6 AND 10;
 SELECT EXISTS(SELECT * FROM player WHERE level > 10);
 ```
 
-## 8. 连接查询（JOIN）
+## 9. 连接查询（JOIN）
 ```sql
 -- 常见类型：INNER JOIN / LEFT JOIN / RIGHT JOIN
 
@@ -239,14 +295,14 @@ SELECT * FROM player p, equip e
 WHERE p.id=e.id;
 ```
 
-## 9. 索引
+## 10. 索引
 ```sql
 CREATE INDEX id_index ON player(id);
 SHOW INDEX FROM player;
 DROP INDEX id_index ON player;
 ```
 
-## 10. 视图
+## 11. 视图
 ```sql
 CREATE VIEW top10 AS
 SELECT * FROM player ORDER BY level DESC LIMIT 10;
@@ -256,7 +312,7 @@ SELECT * FROM top10;
 DROP VIEW top10;
 ```
 
-## 11. 完整命令
+## 12. 完整命令
 ```sql
 USE game;
 
@@ -303,7 +359,7 @@ SELECT * FROM top10;
 
 ---
 
-## 12.权限管理
+## 13.权限管理
 
 **一.创建用户**
 语法：
@@ -398,7 +454,7 @@ DROP USER 'dev'@'127.0.0.1' ；
 
 
 
-## 13.数据备份与恢复
+## 14.数据备份与恢复
 
 **逻辑备份工具-mysqldump**
 

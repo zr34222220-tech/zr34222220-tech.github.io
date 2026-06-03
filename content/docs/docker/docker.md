@@ -11,7 +11,23 @@ draft: false
 
 ### 安装
 
----
+### 
+
+```bash
+yum install -y yum-utils
+```
+
+**添加阿里云 Docker 源**
+
+```bash
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+
+**刷新 yum 缓存**
+
+```bash
+yum clean all && yum makecache
+```
 
 linux：``yum install docker-ce docker-ce-cli containerd.io``
 

@@ -466,7 +466,17 @@ value值的设计其实就是value类型选用：String,Hash,List,Set,Sort Set
 操作方式：
 	所有value之后都转换成json格式字符串，然后缓存到Redis,原因：Java操作方便，减少泛型操作麻烦
 
+---
 
+**String**：缓存、计数器、分布式锁
+
+**List**：队列、任务排队
+
+**Hash**：存对象、配置
+
+**Set**：去重、白名单
+
+**ZSet**：排行榜、排序、统计
 
 ---
 
